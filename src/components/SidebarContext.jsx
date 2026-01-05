@@ -1,4 +1,3 @@
-// contexts/SidebarContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const SidebarContext = createContext();
@@ -12,16 +11,32 @@ export const useSidebar = () => {
 };
 
 export const SidebarProvider = ({ children }) => {
-  // Sidebar state - sessionStorage (resets when browser closes)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    const saved = sessionStorage.getItem("sidebarCollapsed");
-    return saved ? JSON.parse(saved) : false;
+    // Default to collapsed on mobile, expanded on desktop
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth <= 768;
+      const saved = sessionStorage.getItem("sidebarCollapsed");
+      return saved ? JSON.parse(saved) : isMobile;
+    }
+    return true; // Start collapsed by default
   });
 
-  // Theme state - localStorage (persists permanently)
+  // Handle responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      // Auto-collapse on mobile if it's expanded
+      if (isMobile && !isSidebarCollapsed) {
+        setIsSidebarCollapsed(true);
+      }
+    };
 
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isSidebarCollapsed]);
 
-  // Save sidebar state to sessionStorage
+  // Save sidebar state
   useEffect(() => {
     sessionStorage.setItem(
       "sidebarCollapsed",
@@ -29,24 +44,17 @@ export const SidebarProvider = ({ children }) => {
     );
   }, [isSidebarCollapsed]);
 
-
-
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
-  const resetSidebar = () => {
-    setIsSidebarCollapsed(false);
-    sessionStorage.removeItem("sidebarCollapsed");
-  };
+
   const expandSidebar = () => {
-    setIsSidebarCollapsed(true);
+    setIsSidebarCollapsed(false);
   };
 
   const collapseSidebar = () => {
     setIsSidebarCollapsed(true);
   };
-
-
 
   const value = {
     isSidebarCollapsed,
@@ -54,7 +62,6 @@ export const SidebarProvider = ({ children }) => {
     expandSidebar,
     collapseSidebar,
     setIsSidebarCollapsed,
-    resetSidebar,
   };
 
   return (

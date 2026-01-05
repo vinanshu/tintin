@@ -25,6 +25,7 @@
     "react-head": "^3.4.2",
     "react-icons": "^5.5.0",
     "react-pro-sidebar": "^1.1.0",
+    "react-qr-barcode-scanner": "^2.1.20",
     "react-router-dom": "^7.9.4",
     "react-toastify": "^11.0.5",
     "styled-components": "^6.1.19"

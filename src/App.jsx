@@ -28,6 +28,14 @@ import Placement from "./components/admin/JSX/Placement";
 import History from "./components/admin/JSX/History";
 import PersonnelRecentActivity from "./components/admin/JSX/PersonnelRecentActivity";
 
+// Inspector Components
+import InspectorSidebar from "./components/InspectorSidebar";
+import InspectorDashboard from "./components/inspector/JSX/InspectorDashboard";
+import InspectorInventoryControl from "./components/inspector/JSX/InspectorInventoryControl";
+import InspectorEquipmentInspection from "./components/inspector/JSX/InspectorEquipmentInspection";
+import InspectorInspectionReport from "./components/inspector/JSX/InspectorInspectionReport";
+import InspectionHistory from "./components/inspector/JSX/InspectionHistory";
+
 // Recruitment Components
 import RecruitmentDashboard from "./components/admin/JSX/RecruitmentDashboard";
 
@@ -36,15 +44,11 @@ import EmployeeDashboard from "./components/employee/JSX/EmployeeDashboard";
 import EmployeeLeaveDashboard from "./components/employee/JSX/EmployeeLeaveDashboard";
 import EmployeeLeaveRequest from "./components/employee/JSX/EmployeeLeaveRequest";
 
-// Inspector Components
-import InspectorDashboard from "./components/inspector/JSX/InspectorDashboard";
-import InspectorInventoryControl from "./components/inspector/JSX/InspectorInventoryControl";
-import InspectorEquipmentInspection from "./components/inspector/JSX/InspectorEquipmentInspection";
-import InspectorInspectionReport from "./components/inspector/JSX/InspectorInspectionReport";
-import InspectionHistory from "./components/inspector/JSX/InspectionHistory";
+// Other imports
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { HeadProvider } from "react-head";
+
 
 function App() {
   return (
@@ -59,7 +63,10 @@ function App() {
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <AdminDashboard />
                   </ProtectedRoute>
                 }
@@ -67,7 +74,10 @@ function App() {
               <Route
                 path="/inventoryControl"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <InventoryControl />
                   </ProtectedRoute>
                 }
@@ -75,7 +85,10 @@ function App() {
               <Route
                 path="/leaveManagement"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <LeaveManagement />
                   </ProtectedRoute>
                 }
@@ -83,7 +96,10 @@ function App() {
               <Route
                 path="/clearanceSystem"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <ClearanceSystem />
                   </ProtectedRoute>
                 }
@@ -91,7 +107,10 @@ function App() {
               <Route
                 path="/personnelRegister"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <PersonnelRegister />
                   </ProtectedRoute>
                 }
@@ -99,7 +118,10 @@ function App() {
               <Route
                 path="/personnelProfile"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <PersonnelProfile />
                   </ProtectedRoute>
                 }
@@ -107,7 +129,10 @@ function App() {
               <Route
                 path="/leaveRecords"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <LeaveRecords />
                   </ProtectedRoute>
                 }
@@ -115,7 +140,10 @@ function App() {
               <Route
                 path="/clearanceRecords"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <ClearanceRecords />
                   </ProtectedRoute>
                 }
@@ -123,7 +151,10 @@ function App() {
               <Route
                 path="/medicalRecords"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <MedicalRecords />
                   </ProtectedRoute>
                 }
@@ -131,7 +162,10 @@ function App() {
               <Route
                 path="/awardsCommendations"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <AwardsCommendations />
                   </ProtectedRoute>
                 }
@@ -139,7 +173,10 @@ function App() {
               <Route
                 path="/promotion"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <Promotion />
                   </ProtectedRoute>
                 }
@@ -147,7 +184,10 @@ function App() {
               <Route
                 path="/recruitmentPersonnel"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <RecruitmentPersonnel />
                   </ProtectedRoute>
                 }
@@ -155,7 +195,10 @@ function App() {
               <Route
                 path="/trainings"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <Trainings />
                   </ProtectedRoute>
                 }
@@ -163,7 +206,10 @@ function App() {
               <Route
                 path="/placement"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <Placement />
                   </ProtectedRoute>
                 }
@@ -171,43 +217,64 @@ function App() {
               <Route
                 path="/history"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <History />
                   </ProtectedRoute>
                 }
               />
 
-              {/* Recruitment Personnel routes */}
+              {/* Recruitment Dashboard - for ALL recruitment users */}
               <Route
-                path="/recruitment"
+                path="/recruitment-dashboard"
                 element={
-                  <ProtectedRoute requiredRole="recruitment">
+                  <ProtectedRoute 
+                    allowedUserTypes={["recruitment", "recruitment_personnel"]}
+                  >
                     <RecruitmentDashboard />
                   </ProtectedRoute>
                 }
               />
+              
+              {/* Original recruitment route - redirect to dashboard */}
+              <Route
+                path="/recruitment"
+                element={<Navigate to="/recruitment-dashboard" replace />}
+              />
+              
               <Route
                 path="/recruitment/profile"
                 element={
-                  <ProtectedRoute requiredRole="recruitment">
+                  <ProtectedRoute 
+                    allowedUserTypes={["recruitment", "recruitment_personnel"]}
+                  >
                     <PersonnelProfile isRecruitment={true} />
                   </ProtectedRoute>
                 }
               />
+              
               <Route
                 path="/personnelRecentActivity"
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute 
+                    allowedUserTypes={["admin"]}
+                    allowedRoles={["admin"]}
+                  >
                     <PersonnelRecentActivity />
                   </ProtectedRoute>
                 }
               />
 
-              {/* Inspector routes */}
+              {/* Inspector routes - CORRECTED PATHS */}
               <Route
-                path="/InspectorDashboard"
+                path="/inspectorDashboard"
                 element={
-                  <ProtectedRoute requiredRole="inspector">
+                  <ProtectedRoute 
+                    allowedUserTypes={["inspector", "admin"]}
+                    allowedRoles={["inspector", "admin"]}
+                  >
                     <InspectorDashboard />
                   </ProtectedRoute>
                 }
@@ -215,7 +282,10 @@ function App() {
               <Route
                 path="/inspectorInventoryControl"
                 element={
-                  <ProtectedRoute requiredRole="inspector">
+                  <ProtectedRoute 
+                    allowedUserTypes={["inspector", "admin"]}
+                    allowedRoles={["inspector", "admin"]}
+                  >
                     <InspectorInventoryControl />
                   </ProtectedRoute>
                 }
@@ -223,7 +293,10 @@ function App() {
               <Route
                 path="/inspectorEquipmentInspection"
                 element={
-                  <ProtectedRoute requiredRole="inspector">
+                  <ProtectedRoute 
+                    allowedUserTypes={["inspector", "admin"]}
+                    allowedRoles={["inspector", "admin"]}
+                  >
                     <InspectorEquipmentInspection />
                   </ProtectedRoute>
                 }
@@ -231,7 +304,10 @@ function App() {
               <Route
                 path="/inspectorInspectionReport"
                 element={
-                  <ProtectedRoute requiredRole="inspector">
+                  <ProtectedRoute 
+                    allowedUserTypes={["inspector", "admin"]}
+                    allowedRoles={["inspector", "admin"]}
+                  >
                     <InspectorInspectionReport />
                   </ProtectedRoute>
                 }
@@ -239,8 +315,22 @@ function App() {
               <Route
                 path="/InspectionHistory"
                 element={
-                  <ProtectedRoute requiredRole="inspector">
+                  <ProtectedRoute 
+                    allowedUserTypes={["inspector", "admin"]}
+                    allowedRoles={["inspector", "admin"]}
+                  >
                     <InspectionHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inspector"
+                element={
+                  <ProtectedRoute 
+                    allowedUserTypes={["inspector", "admin"]}
+                    allowedRoles={["inspector", "admin"]}
+                  >
+                    <InspectorDashboard />
                   </ProtectedRoute>
                 }
               />
@@ -249,7 +339,10 @@ function App() {
               <Route
                 path="/employee"
                 element={
-                  <ProtectedRoute requiredRole="employee">
+                  <ProtectedRoute 
+                    allowedUserTypes={["personnel"]}
+                    allowedRoles={["employee"]}
+                  >
                     <EmployeeDashboard />
                   </ProtectedRoute>
                 }
@@ -257,7 +350,10 @@ function App() {
               <Route
                 path="/employeeLeaveDashboard"
                 element={
-                  <ProtectedRoute requiredRole="employee">
+                  <ProtectedRoute 
+                    allowedUserTypes={["personnel"]}
+                    allowedRoles={["employee"]}
+                  >
                     <EmployeeLeaveDashboard />
                   </ProtectedRoute>
                 }
@@ -265,7 +361,10 @@ function App() {
               <Route
                 path="/employeeLeaveRequest"
                 element={
-                  <ProtectedRoute requiredRole="employee">
+                  <ProtectedRoute 
+                    allowedUserTypes={["personnel"]}
+                    allowedRoles={["employee"]}
+                  >
                     <EmployeeLeaveRequest />
                   </ProtectedRoute>
                 }

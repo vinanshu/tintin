@@ -1,6 +1,7 @@
 // components/RecruitmentDashboard.jsx - COMPLETELY FIXED VERSION
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../AuthContext";
+import styles from "../styles/RecruitmentDashboard.module.css"; // Fixed import path
 import { useNavigate } from "react-router-dom";
 import { 
   User, FileText, Calendar, CheckCircle, Mail, Download, 
@@ -249,94 +250,72 @@ const RecruitmentDashboard = () => {
   };
 
   const uploadDocument = async () => {
-  if (!selectedDocument || !selectedFile) {
-    alert("Please select a document type and file");
-    return;
-  }
-
-  if (!candidateData?.id) {
-    alert("Please complete your profile first");
-    return;
-  }
-
-  try {
-    setUploading(true);
-    
-    // Get file extension
-    const fileExt = selectedFile.name.split('.').pop();
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    
-    // Create unique filename
-    const fileName = `${selectedDocument}_${timestamp}_${randomStr}.${fileExt}`;
-    const filePath = `${candidateData.id}/${fileName}`;
-
-    console.log('Uploading to path:', filePath);
-
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('recruitment-documents')
-      .upload(filePath, selectedFile, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error("Storage upload error:", uploadError);
-      
-      // Check if it's an RLS error
-      if (uploadError.message.includes('policy') || uploadError.message.includes('security')) {
-        alert("Permission error. Please contact admin to set up proper permissions.");
-        return;
-      }
-      
-      throw uploadError;
+    if (!selectedDocument || !selectedFile) {
+      alert("Please select a document type and file");
+      return;
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('recruitment-documents')
-      .getPublicUrl(filePath);
+    if (!candidateData?.id) {
+      alert("Please complete your profile first");
+      return;
+    }
 
-    // Save to database - WITHOUT mime_type for now
-    const { data: dbData, error: dbError } = await supabase
-      .from("recruitment_documents")
-      .insert([{
-        candidate_id: candidateData.id,
-        candidate_name: candidateData.full_name || candidateData.candidate,
-        document_type: selectedDocument,
-        file_name: selectedFile.name,
-        file_url: publicUrl,
-        file_size: selectedFile.size,
-        // REMOVE mime_type for now - it doesn't exist in the table
-        // mime_type: selectedFile.type,
-        status: 'pending_review',
-        uploaded_at: new Date().toISOString()
-      }])
-      .select();
-
-    if (dbError) {
-      console.error("Database insert error:", dbError);
+    try {
+      setUploading(true);
       
-      // If mime_type column error, retry without it
-      if (dbError.message.includes('mime_type')) {
-        console.log("Retrying without mime_type column...");
+      // Get file extension
+      const fileExt = selectedFile.name.split('.').pop();
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 8);
+      
+      // Create unique filename
+      const fileName = `${selectedDocument}_${timestamp}_${randomStr}.${fileExt}`;
+      const filePath = `${candidateData.id}/${fileName}`;
+
+      console.log('Uploading to path:', filePath);
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('recruitment-documents')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error("Storage upload error:", uploadError);
         
-        const { error: retryError } = await supabase
-          .from("recruitment_documents")
-          .insert([{
-            candidate_id: candidateData.id,
-            candidate_name: candidateData.full_name || candidateData.candidate,
-            document_type: selectedDocument,
-            file_name: selectedFile.name,
-            file_url: publicUrl,
-            file_size: selectedFile.size,
-            status: 'pending_review',
-            uploaded_at: new Date().toISOString()
-          }]);
-          
-        if (retryError) throw retryError;
-      } else {
+        // Check if it's an RLS error
+        if (uploadError.message.includes('policy') || uploadError.message.includes('security')) {
+          alert("Permission error. Please contact admin to set up proper permissions.");
+          return;
+        }
+        
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('recruitment-documents')
+        .getPublicUrl(filePath);
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from("recruitment_documents")
+        .insert([{
+          candidate_id: candidateData.id,
+          candidate_name: candidateData.full_name || candidateData.candidate,
+          document_type: selectedDocument,
+          file_name: selectedFile.name,
+          file_url: publicUrl,
+          file_size: selectedFile.size,
+          status: 'pending_review',
+          uploaded_at: new Date().toISOString()
+        }]);
+
+      if (dbError) {
+        console.error("Database insert error:", dbError);
+        
         // Try to delete the uploaded file if database insert fails
         try {
           await supabase.storage
@@ -353,24 +332,23 @@ const RecruitmentDashboard = () => {
         
         throw dbError;
       }
+
+      console.log("Document uploaded successfully");
+
+      // Refresh and reset
+      await loadDocuments();
+      setSelectedDocument("");
+      setSelectedFile(null);
+      setShowUploadSection(false);
+      alert("✅ Document uploaded successfully! It will be reviewed by HR.");
+
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      alert(`❌ Failed to upload document: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
-
-    console.log("Document uploaded successfully:", dbData);
-
-    // Refresh and reset
-    await loadDocuments();
-    setSelectedDocument("");
-    setSelectedFile(null);
-    setShowUploadSection(false);
-    alert("✅ Document uploaded successfully! It will be reviewed by HR.");
-
-  } catch (error) {
-    console.error("Error uploading document:", error);
-    alert(`❌ Failed to upload document: ${error.message}`);
-  } finally {
-    setUploading(false);
-  }
-};
+  };
 
   const deleteDocument = async (documentId, fileUrl) => {
     if (!confirm("Are you sure you want to delete this document?")) return;
@@ -417,12 +395,12 @@ const RecruitmentDashboard = () => {
     const isPast = scheduleDate < now;
 
     return (
-      <div className="schedule-details">
-        <div className={`schedule-status ${isPast ? 'past' : 'upcoming'}`}>
+      <div className={styles.scheduleDetails}>
+        <div className={`${styles.scheduleStatus} ${isPast ? styles.past : styles.upcoming}`}>
           {isPast ? 'Past Schedule' : 'Upcoming Schedule'}
         </div>
-        <div className="schedule-item">
-          <Calendar className="schedule-icon" />
+        <div className={styles.scheduleItem}>
+          <Calendar className={styles.scheduleIcon} />
           <div>
             <strong>Date & Time:</strong>
             <p>{scheduleDate.toLocaleDateString('en-PH', {
@@ -436,8 +414,8 @@ const RecruitmentDashboard = () => {
           </div>
         </div>
         {schedule.schedule_location && (
-          <div className="schedule-item">
-            <MapPin className="schedule-icon" />
+          <div className={styles.scheduleItem}>
+            <MapPin className={styles.scheduleIcon} />
             <div>
               <strong>Location:</strong>
               <p>{schedule.schedule_location}</p>
@@ -445,8 +423,8 @@ const RecruitmentDashboard = () => {
           </div>
         )}
         {schedule.schedule_notes && (
-          <div className="schedule-item">
-            <FileText className="schedule-icon" />
+          <div className={styles.scheduleItem}>
+            <FileText className={styles.scheduleIcon} />
             <div>
               <strong>Notes:</strong>
               <p>{schedule.schedule_notes}</p>
@@ -454,7 +432,7 @@ const RecruitmentDashboard = () => {
           </div>
         )}
         {!isPast && (
-          <div className="schedule-reminder">
+          <div className={styles.scheduleReminder}>
             <AlertCircle />
             <p>Please arrive 15 minutes before your scheduled time.</p>
           </div>
@@ -557,11 +535,11 @@ const RecruitmentDashboard = () => {
   // Helper functions
   const getStatusColor = (status) => {
     switch(status) {
-      case 'approved': return 'status-approved';
-      case 'rejected': return 'status-rejected';
-      case 'pending_review': return 'status-pending';
-      case 'needs_revision': return 'status-revision';
-      default: return 'status-default';
+      case 'approved': return styles.statusApproved;
+      case 'rejected': return styles.statusRejected;
+      case 'pending_review': return styles.statusPending;
+      case 'needs_revision': return styles.statusRevision;
+      default: return styles.statusDefault;
     }
   };
 
@@ -572,20 +550,20 @@ const RecruitmentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading your profile...</p>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p className={styles.loadingText}>Loading your profile...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error-container">
+      <div className={styles.errorContainer}>
         <AlertCircle size={48} />
         <h3>Error Loading Data</h3>
         <p>{error}</p>
-        <button onClick={loadAllData} className="retry-button">
+        <button onClick={loadAllData} className={styles.retryButton}>
           Retry
         </button>
       </div>
@@ -593,25 +571,25 @@ const RecruitmentDashboard = () => {
   }
 
   return (
-    <div className="recruitment-container">
+    <div className={styles.recruitmentContainer}>
       {/* Header */}
-      <header className="recruitment-header">
-        <div className="header-content">
-          <div className="header-inner">
-            <div className="header-left">
-              <div className="header-icon">
+      <header className={styles.recruitmentHeader}>
+        <div className={styles.headerContent}>
+          <div className={styles.headerInner}>
+            <div className={styles.headerLeft}>
+              <div className={styles.headerIcon}>
                 <User />
               </div>
-              <div className="header-titles">
+              <div className={styles.headerTitles}>
                 <h1>Recruitment Portal</h1>
                 <p>Bureau of Fire Protection Villanueva</p>
               </div>
             </div>
-            <div className="header-right">
-              <div className={`status-badge ${candidateData?.status?.toLowerCase() || 'pending'}`}>
+            <div className={styles.headerRight}>
+              <div className={`${styles.statusBadge} ${styles[candidateData?.status?.toLowerCase() || 'pending']}`}>
                 Status: {candidateData?.status || 'Pending'}
               </div>
-              <button onClick={handleLogout} className="logout-button">
+              <button onClick={handleLogout} className={styles.logoutButton}>
                 <LogOut />
                 Logout
               </button>
@@ -621,68 +599,68 @@ const RecruitmentDashboard = () => {
       </header>
 
       {/* Welcome Banner */}
-      <div className="welcome-banner">
-        <div className="banner-content">
+      <div className={styles.welcomeBanner}>
+        <div className={styles.bannerContent}>
           <h2>Welcome, {candidateData?.full_name || candidateData?.candidate || user?.name || "Candidate"}!</h2>
           <p>Track your application progress and access important information about your recruitment process.</p>
         </div>
       </div>
 
-      <main className="main-content">
+      <main className={styles.mainContent}>
         {/* Application Overview */}
-        <div className="overview-card">
-          <div className="overview-header">
+        <div className={styles.overviewCard}>
+          <div className={styles.overviewHeader}>
             <h2>Application Overview</h2>
-            <div className="overview-date">
+            <div className={styles.overviewDate}>
               Applied: {candidateData?.application_date ? 
                 new Date(candidateData.application_date).toLocaleDateString('en-PH') : 
                 'N/A'}
             </div>
           </div>
 
-          <div className="stats-grid">
-            <div className="stat-card blue">
-              <div className="flex items-center">
-                <div className="stat-icon blue">
+          <div className={styles.statsGrid}>
+            <div className={`${styles.statCard} ${styles.blue}`}>
+              <div className={styles.flex}>
+                <div className={`${styles.statIcon} ${styles.blue}`}>
                   <Briefcase />
                 </div>
-                <div className="stat-content">
+                <div className={styles.statContent}>
                   <p>Position Applied</p>
                   <p>{candidateData?.position || "Firefighter Candidate"}</p>
                 </div>
               </div>
             </div>
 
-            <div className="stat-card green">
-              <div className="flex items-center">
-                <div className="stat-icon green">
+            <div className={`${styles.statCard} ${styles.green}`}>
+              <div className={styles.flex}>
+                <div className={`${styles.statIcon} ${styles.green}`}>
                   <CheckCircle />
                 </div>
-                <div className="stat-content">
+                <div className={styles.statContent}>
                   <p>Current Stage</p>
                   <p>{candidateData?.stage || "Screening"}</p>
                 </div>
               </div>
             </div>
 
-            <div className="stat-card purple">
-              <div className="flex items-center">
-                <div className="stat-icon purple">
+            <div className={`${styles.statCard} ${styles.purple}`}>
+              <div className={styles.flex}>
+                <div className={`${styles.statIcon} ${styles.purple}`}>
                   <FileText />
                 </div>
-                <div className="stat-content">
+                <div className={styles.statContent}>
                   <p>Documents Uploaded</p>
                   <p>{documents.length} / {documentRequirements.filter(d => d.required).length}</p>
                 </div>
               </div>
             </div>
 
-            <div className="stat-card yellow">
-              <div className="flex items-center">
-                <div className="stat-icon yellow">
+            <div className={`${styles.statCard} ${styles.yellow}`}>
+              <div className={styles.flex}>
+                <div className={`${styles.statIcon} ${styles.yellow}`}>
                   <User />
                 </div>
-                <div className="stat-content">
+                <div className={styles.statContent}>
                   <p>Profile Complete</p>
                   <p>{Object.values(profileForm).filter(v => v && v.trim()).length > 5 ? 'Yes' : 'No'}</p>
                 </div>
@@ -692,32 +670,32 @@ const RecruitmentDashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="content-grid">
+        <div className={styles.contentGrid}>
           {/* Left Column - Timeline & Contact */}
           <div>
             {/* Application Timeline */}
-            <div className="timeline-card">
+            <div className={styles.timelineCard}>
               <h3>Application Timeline</h3>
-              <div className="timeline-content">
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-content">
+              <div className={styles.timelineContent}>
+                <div className={styles.timelineItem}>
+                  <div className={styles.timelineDot}></div>
+                  <div className={styles.timelineContent}>
                     <h4>Application Submitted</h4>
                     <p>{candidateData?.application_date ? 
                       new Date(candidateData.application_date).toLocaleDateString('en-PH') : 
                       'Pending'}</p>
                   </div>
                 </div>
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-content">
+                <div className={styles.timelineItem}>
+                  <div className={styles.timelineDot}></div>
+                  <div className={styles.timelineContent}>
                     <h4>Initial Screening</h4>
                     <p>{candidateData?.stage === 'Screening' ? 'In Progress' : 'Pending'}</p>
                   </div>
                 </div>
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-content">
+                <div className={styles.timelineItem}>
+                  <div className={styles.timelineDot}></div>
+                  <div className={styles.timelineContent}>
                     <h4>Interview</h4>
                     <p>{candidateData?.stage === 'Interview' ? 'Scheduled' : 'Pending'}</p>
                   </div>
@@ -726,21 +704,21 @@ const RecruitmentDashboard = () => {
             </div>
 
             {/* Contact Information */}
-            <div className="contact-card">
+            <div className={styles.contactCard}>
               <h3>Your Information</h3>
               <div>
-                <div className="contact-item">
-                  <Mail className="contact-icon" />
-                  <div className="contact-details">
+                <div className={styles.contactItem}>
+                  <Mail className={styles.contactIcon} />
+                  <div className={styles.contactDetails}>
                     <p>Email</p>
                     <p>{candidateData?.username || user?.username}</p>
                   </div>
                 </div>
                 
                 {candidateData?.contact_number && (
-                  <div className="contact-item">
-                    <Phone className="contact-icon" />
-                    <div className="contact-details">
+                  <div className={styles.contactItem}>
+                    <Phone className={styles.contactIcon} />
+                    <div className={styles.contactDetails}>
                       <p>Contact Number</p>
                       <p>{candidateData.contact_number}</p>
                     </div>
@@ -748,9 +726,9 @@ const RecruitmentDashboard = () => {
                 )}
                 
                 {candidateData?.address && (
-                  <div className="contact-item">
-                    <MapPin className="contact-icon" />
-                    <div className="contact-details">
+                  <div className={styles.contactItem}>
+                    <MapPin className={styles.contactIcon} />
+                    <div className={styles.contactDetails}>
                       <p>Address</p>
                       <p>{candidateData.address}</p>
                     </div>
@@ -763,25 +741,25 @@ const RecruitmentDashboard = () => {
           {/* Right Column - Enhanced Features */}
           <div>
             {/* Upload Documents Section */}
-            <div className="actions-card">
-              <div className="section-header">
+            <div className={styles.actionsCard}>
+              <div className={styles.sectionHeader}>
                 <h3>Upload Documents</h3>
                 <button 
                   onClick={() => setShowUploadSection(!showUploadSection)}
-                  className="toggle-button"
+                  className={styles.toggleButton}
                 >
                   {showUploadSection ? <ChevronUp /> : <ChevronDown />}
                 </button>
               </div>
               
               {showUploadSection && (
-                <div className="upload-section">
-                  <div className="document-selection">
+                <div className={styles.uploadSection}>
+                  <div className={styles.documentSelection}>
                     <label>Select Document Type</label>
                     <select 
                       value={selectedDocument}
                       onChange={(e) => setSelectedDocument(e.target.value)}
-                      className="document-select"
+                      className={styles.documentSelect}
                     >
                       <option value="">Choose document type...</option>
                       {documentRequirements.map((req) => (
@@ -792,7 +770,7 @@ const RecruitmentDashboard = () => {
                     </select>
                     
                     {selectedDocument && (
-                      <div className="document-info">
+                      <div className={styles.documentInfo}>
                         <p>
                           <strong>Max file size:</strong> {
                             documentRequirements.find(r => r.type === selectedDocument)?.maxSize || 5
@@ -805,31 +783,31 @@ const RecruitmentDashboard = () => {
                     )}
                   </div>
                   
-                  <div className="file-upload-area">
+                  <div className={styles.fileUploadArea}>
                     <input
                       type="file"
                       id="document-upload"
                       onChange={handleFileSelect}
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      className="file-input"
+                      className={styles.fileInput}
                     />
-                    <label htmlFor="document-upload" className="file-label">
-                      <Upload className="upload-icon" />
+                    <label htmlFor="document-upload" className={styles.fileLabel}>
+                      <Upload className={styles.uploadIcon} />
                       <span>{selectedFile ? selectedFile.name : "Choose File"}</span>
                     </label>
                     
                     {selectedFile && (
-                      <div className="file-preview">
+                      <div className={styles.filePreview}>
                         <FileText />
                         <div>
-                          <p className="file-name">{selectedFile.name}</p>
-                          <p className="file-size">
+                          <p className={styles.fileName}>{selectedFile.name}</p>
+                          <p className={styles.fileSize}>
                             {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
                         <button 
                           onClick={() => setSelectedFile(null)}
-                          className="remove-file"
+                          className={styles.removeFile}
                         >
                           <X />
                         </button>
@@ -839,11 +817,11 @@ const RecruitmentDashboard = () => {
                     <button 
                       onClick={uploadDocument}
                       disabled={uploading || !selectedDocument || !selectedFile}
-                      className="upload-button primary"
+                      className={`${styles.uploadButton} ${styles.primary}`}
                     >
                       {uploading ? (
                         <>
-                          <div className="spinner-small"></div>
+                          <div className={styles.spinnerSmall}></div>
                           Uploading...
                         </>
                       ) : (
@@ -858,75 +836,75 @@ const RecruitmentDashboard = () => {
               )}
               
               {/* Quick Actions */}
-              <div className="quick-actions">
-                <button className="action-button green" onClick={() => setShowScheduleDetails(!showScheduleDetails)}>
-                  <div className="action-content">
-                    <Calendar className="action-icon green" />
-                    <span className="action-text">View Schedule</span>
+              <div className={styles.quickActions}>
+                <button className={`${styles.actionButton} ${styles.green}`} onClick={() => setShowScheduleDetails(!showScheduleDetails)}>
+                  <div className={styles.actionContent}>
+                    <Calendar className={`${styles.actionIcon} ${styles.green}`} />
+                    <span className={styles.actionText}>View Schedule</span>
                   </div>
-                  <span className="arrow-icon">→</span>
+                  <span className={styles.arrowIcon}>→</span>
                 </button>
 
-                <button className="action-button purple" onClick={() => setShowContactForm(true)}>
-                  <div className="action-content">
-                    <Mail className="action-icon purple" />
-                    <span className="action-text">Contact HR</span>
+                <button className={`${styles.actionButton} ${styles.purple}`} onClick={() => setShowContactForm(true)}>
+                  <div className={styles.actionContent}>
+                    <Mail className={`${styles.actionIcon} ${styles.purple}`} />
+                    <span className={styles.actionText}>Contact HR</span>
                   </div>
-                  <span className="arrow-icon">→</span>
+                  <span className={styles.arrowIcon}>→</span>
                 </button>
 
-                <button className="action-button yellow" onClick={() => setShowUpdateProfile(true)}>
-                  <div className="action-content">
-                    <Edit className="action-icon yellow" />
-                    <span className="action-text">Update Profile</span>
+                <button className={`${styles.actionButton} ${styles.yellow}`} onClick={() => setShowUpdateProfile(true)}>
+                  <div className={styles.actionContent}>
+                    <Edit className={`${styles.actionIcon} ${styles.yellow}`} />
+                    <span className={styles.actionText}>Update Profile</span>
                   </div>
-                  <span className="arrow-icon">→</span>
+                  <span className={styles.arrowIcon}>→</span>
                 </button>
               </div>
             </div>
 
             {/* Schedule Display */}
             {showScheduleDetails && (
-              <div className="schedule-card">
+              <div className={styles.scheduleCard}>
                 <h3>Your Schedule</h3>
                 {formatSchedule()}
               </div>
             )}
 
             {/* Documents Status */}
-            <div className="documents-card">
+            <div className={styles.documentsCard}>
               <h3>Document Status</h3>
               {documents.length > 0 ? (
-                <div className="documents-list">
+                <div className={styles.documentsList}>
                   {documents.map((doc) => (
-                    <div key={doc.id} className="document-item">
-                      <div className="document-info">
-                        <FileText className="document-icon" />
+                    <div key={doc.id} className={styles.documentItem}>
+                      <div className={styles.documentInfo}>
+                        <FileText className={styles.documentIcon} />
                         <div>
-                          <p className="document-name">{getDocumentName(doc.document_type)}</p>
-                          <p className="document-meta">
+                          <p className={styles.documentName}>{getDocumentName(doc.document_type)}</p>
+                          <p className={styles.documentMeta}>
                             Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()} • 
                             Size: {(doc.file_size / 1024 / 1024).toFixed(2)}MB
                           </p>
                         </div>
                       </div>
-                      <div className="document-actions">
-                        <span className={`document-status ${getStatusColor(doc.status)}`}>
+                      <div className={styles.documentActions}>
+                        <span className={`${styles.documentStatus} ${getStatusColor(doc.status)}`}>
                           {doc.status.replace('_', ' ')}
                         </span>
-                        <div className="action-buttons">
+                        <div className={styles.actionButtons}>
                           <a
                             href={doc.file_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="view-button"
+                            className={styles.viewButton}
                             title="View Document"
                           >
                             <Eye />
                           </a>
                           <button
                             onClick={() => deleteDocument(doc.id, doc.file_url)}
-                            className="delete-button"
+                            className={styles.deleteButton}
                             title="Delete Document"
                           >
                             <Trash2 />
@@ -937,29 +915,29 @@ const RecruitmentDashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="no-documents">
-                  <FileText className="no-docs-icon" />
+                <div className={styles.noDocuments}>
+                  <FileText className={styles.noDocsIcon} />
                   <p>No documents uploaded yet</p>
-                  <p className="subtext">Upload your required documents to proceed with your application</p>
+                  <p className={styles.subtext}>Upload your required documents to proceed with your application</p>
                 </div>
               )}
             </div>
 
             {/* Required Documents Summary */}
-            <div className="requirements-card">
+            <div className={styles.requirementsCard}>
               <h3>Required Documents</h3>
-              <div className="requirements-list">
+              <div className={styles.requirementsList}>
                 {documentRequirements.map((req) => {
                   const uploadedDoc = documents.find(d => d.document_type === req.type);
                   return (
-                    <div key={req.type} className="requirement-item">
-                      <div className="requirement-info">
-                        <div className={`requirement-status ${uploadedDoc ? 'uploaded' : 'missing'}`}>
+                    <div key={req.type} className={styles.requirementItem}>
+                      <div className={styles.requirementInfo}>
+                        <div className={`${styles.requirementStatus} ${uploadedDoc ? styles.uploaded : styles.missing}`}>
                           {uploadedDoc ? <Check /> : <AlertCircle />}
                         </div>
-                        <span className="requirement-name">{req.name}</span>
+                        <span className={styles.requirementName}>{req.name}</span>
                       </div>
-                      <span className="requirement-size">{req.maxSize}MB max</span>
+                      <span className={styles.requirementSize}>{req.maxSize}MB max</span>
                     </div>
                   );
                 })}
@@ -971,17 +949,17 @@ const RecruitmentDashboard = () => {
 
       {/* Contact HR Modal */}
       {showContactForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
               <h3>Contact HR Department</h3>
-              <button onClick={() => setShowContactForm(false)} className="close-button">
+              <button onClick={() => setShowContactForm(false)} className={styles.closeButton}>
                 <X />
               </button>
             </div>
-            <div className="modal-body">
-              <div className="hr-contact-info">
-                <div className="contact-card">
+            <div className={styles.modalBody}>
+              <div className={styles.hrContactInfo}>
+                <div className={styles.contactCard}>
                   <h4>HR Contact Information</h4>
                   <p><strong>Contact Person:</strong> {candidateData?.hr_contact_person || 'HR Department'}</p>
                   <p><strong>Email:</strong> {candidateData?.hr_contact_email || 'hr@bfp-villanueva.gov.ph'}</p>
@@ -990,13 +968,13 @@ const RecruitmentDashboard = () => {
                 </div>
               </div>
               
-              <div className="message-form">
-                <div className="form-group">
+              <div className={styles.messageForm}>
+                <div className={styles.formGroup}>
                   <label>Subject</label>
                   <select
                     value={contactSubject}
                     onChange={(e) => setContactSubject(e.target.value)}
-                    className="subject-select"
+                    className={styles.subjectSelect}
                   >
                     <option value="Inquiry">General Inquiry</option>
                     <option value="Schedule">Schedule Related</option>
@@ -1006,7 +984,7 @@ const RecruitmentDashboard = () => {
                   </select>
                 </div>
                 
-                <div className="form-group">
+                <div className={styles.formGroup}>
                   <label>Your Message</label>
                   <textarea
                     value={contactMessage}
@@ -1016,15 +994,15 @@ const RecruitmentDashboard = () => {
                   />
                 </div>
                 
-                <div className="form-actions">
+                <div className={styles.formActions}>
                   <button 
                     onClick={sendMessageToHR}
                     disabled={sendingMessage || !contactMessage.trim()}
-                    className="send-button"
+                    className={styles.sendButton}
                   >
                     {sendingMessage ? (
                       <>
-                        <div className="spinner-small"></div>
+                        <div className={styles.spinnerSmall}></div>
                         Sending...
                       </>
                     ) : (
@@ -1036,7 +1014,7 @@ const RecruitmentDashboard = () => {
                   </button>
                   <button 
                     onClick={() => setShowContactForm(false)}
-                    className="cancel-button"
+                    className={styles.cancelButton}
                   >
                     Cancel
                   </button>
@@ -1049,20 +1027,20 @@ const RecruitmentDashboard = () => {
 
       {/* Update Profile Modal */}
       {showUpdateProfile && (
-        <div className="modal-overlay">
-          <div className="modal-content large">
-            <div className="modal-header">
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.modalContent} ${styles.large}`}>
+            <div className={styles.modalHeader}>
               <h3>Update Profile Information</h3>
-              <button onClick={() => setShowUpdateProfile(false)} className="close-button">
+              <button onClick={() => setShowUpdateProfile(false)} className={styles.closeButton}>
                 <X />
               </button>
             </div>
-            <div className="modal-body">
-              <div className="profile-form">
-                <div className="form-section">
+            <div className={styles.modalBody}>
+              <div className={styles.profileForm}>
+                <div className={styles.formSection}>
                   <h4>Personal Information</h4>
-                  <div className="form-row">
-                    <div className="form-group">
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
                       <label>Full Name *</label>
                       <input
                         type="text"
@@ -1072,7 +1050,7 @@ const RecruitmentDashboard = () => {
                         required
                       />
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label>Date of Birth</label>
                       <input
                         type="date"
@@ -1082,8 +1060,8 @@ const RecruitmentDashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="form-row">
-                    <div className="form-group">
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
                       <label>Gender</label>
                       <select
                         value={profileForm.gender}
@@ -1095,7 +1073,7 @@ const RecruitmentDashboard = () => {
                         <option value="other">Other</option>
                       </select>
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label>Civil Status</label>
                       <select
                         value={profileForm.civil_status}
@@ -1111,9 +1089,9 @@ const RecruitmentDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-section">
+                <div className={styles.formSection}>
                   <h4>Contact Information</h4>
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
                     <label>Contact Number</label>
                     <input
                       type="tel"
@@ -1123,8 +1101,8 @@ const RecruitmentDashboard = () => {
                     />
                   </div>
                   
-                  <div className="form-row">
-                    <div className="form-group">
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
                       <label>Emergency Contact Name</label>
                       <input
                         type="text"
@@ -1133,7 +1111,7 @@ const RecruitmentDashboard = () => {
                         placeholder="Emergency contact person"
                       />
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label>Emergency Contact Number</label>
                       <input
                         type="tel"
@@ -1145,9 +1123,9 @@ const RecruitmentDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-section">
+                <div className={styles.formSection}>
                   <h4>Address Information</h4>
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
                     <label>Complete Address</label>
                     <textarea
                       value={profileForm.address}
@@ -1157,8 +1135,8 @@ const RecruitmentDashboard = () => {
                     />
                   </div>
                   
-                  <div className="form-row">
-                    <div className="form-group">
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
                       <label>City/Municipality</label>
                       <input
                         type="text"
@@ -1167,7 +1145,7 @@ const RecruitmentDashboard = () => {
                         placeholder="Villanueva"
                       />
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label>Province</label>
                       <input
                         type="text"
@@ -1176,7 +1154,7 @@ const RecruitmentDashboard = () => {
                         placeholder="Misamis Oriental"
                       />
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label>ZIP Code</label>
                       <input
                         type="text"
@@ -1188,9 +1166,9 @@ const RecruitmentDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-section">
+                <div className={styles.formSection}>
                   <h4>Educational Background</h4>
-                  <div className="form-group">
+                  <div className={styles.formGroup}>
                     <textarea
                       value={profileForm.educational_background}
                       onChange={(e) => setProfileForm({...profileForm, educational_background: e.target.value})}
@@ -1204,12 +1182,12 @@ const RecruitmentDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-actions">
-                  <button onClick={updateProfile} className="save-button">
+                <div className={styles.formActions}>
+                  <button onClick={updateProfile} className={styles.saveButton}>
                     <Save />
                     Save Changes
                   </button>
-                  <button onClick={() => setShowUpdateProfile(false)} className="cancel-button">
+                  <button onClick={() => setShowUpdateProfile(false)} className={styles.cancelButton}>
                     Cancel
                   </button>
                 </div>

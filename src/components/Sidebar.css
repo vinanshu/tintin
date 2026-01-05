@@ -22,50 +22,73 @@ body {
 }
 
 /* ================================
-  HAMBURGER MENU
+  FLOATING MENU BUTTON - MOBILE & DESKTOP
 =============================== */
-.hamburger {
+.floating-menu-btn {
   position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 36px;
-  height: 28px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background: var(--bg-buttons);
-  border: none;
-  border-radius: 6px;
-  padding: 6px;
-  cursor: pointer;
+  bottom: 25px;
+  right: 25px;
   z-index: 1110;
-  transition: background 0.3s ease;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 120px;
+  animation: float 3s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
 }
-/* Explanation: Fixed positioning with high z-index ensures hamburger is always clickable */
 
-.hamburger .bar {
-  width: 100%;
-  height: 4px;
-  background-color: white;
-  border-radius: 2px;
-  transition: all 0.4s ease;
+.floating-menu-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.6);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
 }
 
-.hamburger.active .top {
-  transform: translateY(10px) rotate(45deg);
+.floating-menu-btn:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
-.hamburger.active .middle {
-  opacity: 0;
+.floating-menu-btn .menu-icon,
+.floating-menu-btn .close-icon {
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.hamburger.active .bottom {
-  transform: translateY(-10px) rotate(-45deg);
+.floating-menu-btn .menu-text {
+  transition: all 0.3s ease;
 }
-/* Explanation: Transform animations create the hamburger-to-X transition */
+
+/* Hide floating button on desktop when sidebar is expanded */
+@media (min-width: 769px) {
+  .sidebar:not(.collapsed) ~ .floating-menu-btn {
+    display: none;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.6);
+  }
+}
 
 /* ================================
-  SIDEBAR CONTAINER - FIXED
+  SIDEBAR CONTAINER
 =============================== */
 .sidebar {
   position: fixed;
@@ -75,15 +98,39 @@ body {
   width: var(--sidebar-width);
   background: rgb(219, 219, 219);
   color: var(--text-primary);
-  padding: 70px 10px 20px 10px;
+  padding: 20px 10px 20px 10px;
   z-index: 1000;
   overflow-y: auto;
   overflow-x: hidden;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: width;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
 }
-/* Explanation: Fixed sidebar with overflow control prevents content from spilling out */
+
+/* Desktop: Sidebar always visible when expanded */
+@media (min-width: 769px) {
+  .sidebar:not(.collapsed) {
+    transform: translateX(0) !important;
+  }
+  
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+}
+
+/* Mobile: Sidebar is overlay */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 85vw !important;
+    max-width: 320px;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+}
 
 .sidebar-inner {
   height: 100%;
@@ -104,68 +151,6 @@ body {
 .sidebar-inner::-webkit-scrollbar-thumb {
   background: var(--bg-buttons);
   border-radius: 4px;
-}
-
-/* ================================
-  THEME TOGGLE
-=============================== */
-.sidebar .theme-toggle {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 100;
-}
-
-.sidebar .theme-toggle button {
-  font-size: 22px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-primary);
-  transition: all 0.3s ease;
-  padding: 5px;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar .theme-toggle button:hover {
-  transform: rotate(20deg) scale(1.1);
-  background: rgba(255, 255, 255, 0.8);
-}
-
-/* ================================
-  COLLAPSED SIDEBAR
-=============================== */
-.sidebar.collapsed {
-  width: var(--sidebar-collapsed-width);
-  padding: 70px 5px 20px 5px;
-}
-
-.sidebar.collapsed img {
-  position: relative;
-  left: 10px;
-}
-
-.sidebar.collapsed h2,
-.sidebar.collapsed img + span,
-.sidebar.collapsed a span,
-.sidebar.collapsed .dropdown-toggle span {
-  display: none;
-}
-
-.sidebar.collapsed a,
-.sidebar.collapsed .dropdown-toggle {
-  justify-content: center;
-}
-
-.sidebar.collapsed .theme-toggle {
-  position: absolute;
-  top: 15px;
-  right: 5px;
 }
 
 /* ================================
@@ -256,11 +241,12 @@ body {
 }
 
 /* ================================
-  DROPDOWN SECTIONS - FIXED FOR NO OVERLAP
+  DROPDOWN SECTIONS
 =============================== */
 .dropdown-section {
   position: relative;
   width: 100%;
+  margin: 10px 0;
 }
 
 .dropdown-toggle {
@@ -271,7 +257,6 @@ body {
   align-items: center;
   padding: 12px 14px;
   border-radius: 8px;
-  margin: 8px 0;
   color: var(--text-primary);
   background: rgb(255, 255, 255);
   transition: all 0.35s ease-in-out;
@@ -279,7 +264,7 @@ body {
   z-index: 10;
 }
 
-/* Dropdown Content - Expanded Sidebar */
+/* Dropdown Content */
 .dropdown-content {
   position: absolute;
   top: 100%;
@@ -299,15 +284,35 @@ body {
   z-index: 100;
   pointer-events: none;
 }
-/* Explanation: Dropdowns stay within sidebar bounds with absolute positioning */
 
-.dropdown-section:hover .dropdown-content,
-.dropdown-content.show {
-  max-height: 500px;
-  opacity: 1;
-  transform: translateY(0);
-  padding: 8px 0;
-  pointer-events: auto;
+/* Desktop hover */
+@media (min-width: 769px) {
+  .dropdown-section:hover .dropdown-content {
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+    padding: 8px 0;
+    pointer-events: auto;
+  }
+}
+
+/* Mobile click */
+@media (max-width: 768px) {
+  .dropdown-section.active .dropdown-content {
+    position: relative;
+    top: 0;
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+    padding: 8px 0;
+    margin-top: 5px;
+    pointer-events: auto;
+    background: rgba(156, 156, 156, 0.15);
+  }
+  
+  .dropdown-toggle {
+    cursor: pointer;
+  }
 }
 
 .dropdown-content a {
@@ -324,7 +329,7 @@ body {
   font-weight: 500;
 }
 
-/* Personnel Records */
+/* Dropdown section colors */
 .personnel-records .dropdown-toggle {
   background: rgba(255, 0, 255, 0.228);
   border-left: 4px solid rgb(242, 0, 234);
@@ -333,7 +338,6 @@ body {
 
 .personnel-records .dropdown-toggle:hover {
   background: linear-gradient(135deg, rgba(184, 6, 212, 0.95), rgba(46, 0, 211, 0.9)) !important;
-  animation: pulseGlow 1.6s ease-in-out infinite;
 }
 
 .personnel-records .dropdown-content a {
@@ -342,27 +346,10 @@ body {
   border-bottom: 4px solid rgb(255, 255, 255) !important;
 }
 
-.personnel-records .dropdown-content a:hover {
-  background: linear-gradient(135deg, rgba(184, 6, 212, 0.95), rgba(46, 0, 211, 0.9)) !important;
-  border-left: 4px solid rgb(242, 0, 234) !important;
-  border-bottom: 4px solid rgb(242, 0, 234) !important;
-}
-
-/* Morale Records */
 .morale-records .dropdown-toggle {
   background: rgba(255, 99, 132, 0.15);
   border-left: 4px solid #ff6384;
   border-bottom: 4px solid #ff6384;
-}
-
-.morale-records .dropdown-toggle:hover {
-  background: linear-gradient(135deg, #ff6384, #ff9aa2);
-  color: #fff;
-  border-left: 4px solid #d32e52;
-  border-bottom: 4px solid #d32e52;
-  box-shadow: 0 0 18px rgba(255, 99, 132, 0.6);
-  animation: heartbeat 1.4s ease-in-out infinite;
-  transform: translateY(-2px) scale(1.03);
 }
 
 .morale-records .dropdown-content a {
@@ -371,29 +358,10 @@ body {
   border-bottom: 4px solid rgb(255, 255, 255) !important;
 }
 
-.morale-records .dropdown-content a:hover {
-  background: rgba(255, 2, 82, 0.95);
-  border-left: 4px solid rgba(152, 1, 49, 0.85) !important;
-  border-bottom: 4px solid rgba(152, 1, 49, 0.85) !important;
-}
-
-/* HR Records */
 .hr-records .dropdown-toggle {
   background: rgba(59, 130, 246, 0.12);
   border-left: 4px solid #3b82f6;
   border-bottom: 4px solid #3b82f6;
-  color: var(--text-primary);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.35s ease;
-}
-
-.hr-records .dropdown-toggle:hover {
-  color: #fff;
-  border-left: 4px solid #234f96;
-  border-bottom: 4px solid #234f96;
-  background: linear-gradient(135deg, #0280ff, #0004fb);
-  box-shadow: 0 0 22px rgba(0, 255, 225, 0.772);
 }
 
 .hr-records .dropdown-content a {
@@ -402,89 +370,8 @@ body {
   border-bottom: 4px solid rgb(255, 255, 255) !important;
 }
 
-.hr-records .dropdown-content a:hover {
-  background: rgba(0, 98, 255, 0.9);
-  border-left: 4px solid rgba(0, 52, 136, 0.85) !important;
-  border-bottom: 4px solid rgba(0, 52, 136, 0.85) !important;
-}
-
 /* ================================
-  COLLAPSED SIDEBAR DROPDOWNS (TOOLTIPS)
-=============================== */
-.sidebar.collapsed .dropdown-content {
-  position: fixed !important;
-  left: var(--sidebar-collapsed-width) !important;
-  top: auto !important;
-  width: 280px !important;
-  margin-left: 10px;
-  margin-top: -60px;
-  box-shadow: -6px 4px 15px rgba(0, 0, 0, 0.743);
-  z-index: 1100;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .dropdown-section:hover .dropdown-content {
-  pointer-events: auto;
-}
-
-.sidebar.collapsed .dropdown-content a span {
-  display: inline !important;
-  color: white !important;
-}
-
-/* Tooltip Styling */
-.dropdown-tooltip {
-  position: fixed;
-  z-index: 1100;
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  animation: fadeIn 0.2s ease;
-  overflow: hidden;
-  min-width: 280px;
-  max-width: 280px;
-}
-
-.tooltip-header {
-  padding: 12px 16px;
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: white;
-}
-
-.personnel-records .tooltip-header {
-  background: linear-gradient(135deg, rgba(184, 6, 212, 0.95), rgba(46, 0, 211, 0.9)) !important;
-}
-
-.morale-records .tooltip-header {
-  background: linear-gradient(135deg, #ff6384, #ff9aa2);
-}
-
-.hr-records .tooltip-header {
-  background: linear-gradient(135deg, #0665ff, #2563eb);
-}
-
-.tooltip-items {
-  padding: 1px 0;
-}
-
-.tooltip-items a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  color: white;
-  transition: all 0.2s ease;
-  margin: 2px 4px;
-  border-radius: 6px;
-  margin-bottom: 5px;
-}
-
-/* ================================
-  MAIN CONTENT - FIXED NO-OVERLAP
+  MAIN CONTENT
 =============================== */
 .main-content {
   margin-left: var(--sidebar-width);
@@ -498,158 +385,137 @@ body {
   transition: margin-left 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* Explanation: Main content uses margin-left to create space, preventing overlap */
 
-.main-content.collapsed {
-  margin-left: var(--sidebar-collapsed-width);
-  width: calc(100% - var(--sidebar-collapsed-width));
-}
-
-/* ================================
-  ANIMATIONS
-=============================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+/* Desktop collapsed */
+@media (min-width: 769px) {
+  .sidebar.collapsed + .main-content {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 12px rgba(255, 0, 204, 0.703);
-  }
-  50% {
-    box-shadow: 0 0 22px rgba(255, 2, 204, 0.991);
-  }
-}
-
-@keyframes heartbeat {
-  0%, 100% {
-    transform: scale(1.04);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-@keyframes floatPulse {
-  from {
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-    transform: translateY(0);
-  }
-  to {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.7);
-    transform: translateY(-2px);
-  }
-}
-
-/* ================================
-  RESPONSIVE DESIGN
-=============================== */
+/* Mobile: Full width */
 @media (max-width: 768px) {
-  /* Mobile: sidebar becomes overlay */
-  .sidebar {
-    transform: translateX(-100%);
-    width: 280px !important;
-    z-index: 1000;
-  }
-  
-  .sidebar:not(.collapsed) {
-    transform: translateX(0);
-  }
-  
-  /* Mobile: main content takes full width */
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
-    padding: 20px;
+    padding: 20px 15px 100px 15px; /* Extra bottom padding for button */
   }
-  
-  .main-content.collapsed {
-    margin-left: 0 !important;
-    width: 100% !important;
-  }
-  
-  /* Mobile: adjust dropdowns */
-  .dropdown-content {
-    position: relative !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    margin: 5px 0;
-  }
-  
-  .sidebar.collapsed .dropdown-content {
-    position: fixed !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 90% !important;
-    max-width: 300px;
-    margin: 0;
-  }
-  
-  /* Mobile overlay */
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    display: none;
-  }
-  
-  .sidebar:not(.collapsed) + .overlay {
+}
+
+/* ================================
+  MOBILE OVERLAY
+=============================== */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar:not(.collapsed) ~ .sidebar-overlay {
     display: block;
   }
 }
 
-/* ================================
-  UTILITY CLASSES
-=============================== */
-.no-overlap {
-  position: relative;
-  z-index: 1;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* ================================
-  FIXED POSITION CONFLICT RESOLUTION
+  RESPONSIVE ADJUSTMENTS
 =============================== */
-/* Clear z-index hierarchy */
-.hamburger { z-index: 1110; }
-.sidebar.collapsed .dropdown-content,
-.dropdown-tooltip { z-index: 1100; }
-.sidebar { z-index: 1000; }
-.dropdown-content { z-index: 100; }
-.main-content { z-index: 1; }
-.overlay { z-index: 999; }
 
-/* Prevent any fixed element from causing overlap */
-.hamburger,
-.sidebar,
-.dropdown-tooltip,
-.overlay {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+/* Small Mobile (up to 360px) */
+@media (max-width: 360px) {
+  .floating-menu-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 12px 18px;
+    min-width: 100px;
+    font-size: 14px;
+  }
+  
+  .sidebar {
+    width: 90vw !important;
+  }
+  
+  .sidebar-link,
+  .dropdown-toggle {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Tablet (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 260px;
+  }
+  
+  .main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+  
+  .floating-menu-btn {
+    bottom: 30px;
+    right: 30px;
+  }
+}
+
+/* Large Desktop (1025px and above) */
+@media (min-width: 1025px) {
+  .sidebar {
+    width: 300px;
+  }
+  
+  .main-content {
+    margin-left: 300px;
+    width: calc(100% - 300px);
+  }
+}
+
+/* ================================
+  TOUCH FRIENDLY
+=============================== */
+.floating-menu-btn,
+.sidebar-link,
+.dropdown-toggle {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Increase touch targets on mobile */
+@media (max-width: 768px) {
+  .sidebar-link,
+  .dropdown-toggle {
+    min-height: 50px;
+    padding: 15px 16px;
+  }
+  
+  .dropdown-item {
+    min-height: 46px;
+    padding: 13px 16px;
+  }
 }
 
 /* ================================
@@ -657,9 +523,8 @@ body {
 =============================== */
 .sidebar a:focus,
 .dropdown-toggle:focus,
-.hamburger:focus,
-.theme-toggle button:focus {
-  outline: 2px solid var(--accent);
+.floating-menu-btn:focus {
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 

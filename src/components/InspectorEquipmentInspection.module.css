@@ -1,0 +1,302 @@
+/* Add these styles to InspectorEquipmentInspection.module.css */
+
+/* Scanner Modal Styles */
+.scannerModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.scannerModal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.scannerHeader {
+  padding: 20px;
+  border-bottom: 1px solid #eaeaea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.scannerHeader h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.closeScannerBtn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.closeScannerBtn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.scannerContent {
+  padding: 20px;
+}
+
+/* Scanner Viewport */
+.scannerContainer {
+  position: relative;
+  width: 100%;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scannerViewport {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  position: relative;
+}
+
+/* Scanner Status */
+.scannerStatus {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.scannerLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.scannerActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.scanningText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #2ecc71;
+  font-size: 1.1rem;
+}
+
+.scanningDot {
+  color: #2ecc71;
+  animation: pulse 1.5s infinite;
+}
+
+.scannerHint {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+/* Manual Entry */
+.manualEntrySection {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.manualEntryBtn {
+  background: #f8f9fa;
+  border: 2px dashed #3498db;
+  color: #3498db;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manualEntryBtn:hover:not(:disabled) {
+  background: #3498db;
+  color: white;
+  border-style: solid;
+}
+
+.manualEntryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scanner Tips */
+.scannerTips {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #3498db;
+}
+
+.scannerTips h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.scannerTips ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #555;
+}
+
+.scannerTips li {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+/* Scanner Actions */
+.scannerActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.startScannerBtn,
+.stopScannerBtn,
+.cancelScannerBtn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  min-width: 140px;
+}
+
+.startScannerBtn {
+  background: #2ecc71;
+  color: white;
+}
+
+.startScannerBtn:hover:not(:disabled) {
+  background: #27ae60;
+  transform: translateY(-2px);
+}
+
+.stopScannerBtn {
+  background: #e74c3c;
+  color: white;
+}
+
+.stopScannerBtn:hover:not(:disabled) {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+.cancelScannerBtn {
+  background: #95a5a6;
+  color: white;
+}
+
+.cancelScannerBtn:hover {
+  background: #7f8c8d;
+  transform: translateY(-2px);
+}
+
+.startScannerBtn:disabled,
+.stopScannerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .scannerModal {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .scannerContainer {
+    min-height: 250px;
+  }
+  
+  .scannerActions {
+    flex-direction: column;
+  }
+  
+  .startScannerBtn,
+  .stopScannerBtn,
+  .cancelScannerBtn {
+    width: 100%;
+    min-width: auto;
+  }
+}

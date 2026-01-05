@@ -1,16 +1,15 @@
-// hooks/Sidebar.jsx - Updated for tooltip approach
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useSidebar } from "./SidebarContext";
 
 const Sidebar = () => {
-  const { isSidebarCollapsed, expandSidebar, currentTheme, toggleTheme } =
-    useSidebar();
+  const { isSidebarCollapsed, toggleSidebar, expandSidebar } = useSidebar();
   const [activeTab, setActiveTab] = useState("");
-  const [tooltipContent, setTooltipContent] = useState(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState({});
   const location = useLocation();
-  const [hoverTimeout, setHoverTimeout] = useState(null);
+  const sidebarRef = useRef(null);
+
   const dropdownSections = [
     {
       id: "personnel",
@@ -61,261 +60,214 @@ const Sidebar = () => {
     },
   ];
 
+  // Check if mobile and set initial state
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      
+      // Auto-collapse on mobile, auto-expand on desktop
+      if (mobile && !isSidebarCollapsed) {
+        toggleSidebar();
+      } else if (!mobile && isSidebarCollapsed) {
+        toggleSidebar();
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isMobile && 
+          sidebarRef.current && 
+          !sidebarRef.current.contains(e.target) && 
+          !e.target.closest('.floating-menu-btn') &&
+          !isSidebarCollapsed) {
+        toggleSidebar();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMobile, isSidebarCollapsed, toggleSidebar]);
+
   useEffect(() => {
     const currentPath = location.pathname;
     setActiveTab(currentPath);
   }, [location.pathname]);
 
-  const handleDropdownHover = (section, e) => {
-    if (isSidebarCollapsed) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      setTooltipPosition({
-        x: rect.right + 10,
-        y: rect.top,
-      });
-      setTooltipContent(section);
-
-      // Clear any existing timeout
-      if (hoverTimeout) {
-        clearTimeout(hoverTimeout);
-        setHoverTimeout(null);
-      }
-    }
-  };
-  const handleTooltipEnter = () => {
-    // Clear the hide timeout when entering the tooltip
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-  };
-  const handleTooltipLeave = () => {
-    // Hide tooltip after a short delay
-    const timeout = setTimeout(() => {
-      setTooltipContent(null);
-    }, 150);
-    setHoverTimeout(timeout);
-  };
-  const handleDropdownLeave = (e) => {
-    // Only hide if not hovering over the tooltip itself
-    if (!e.relatedTarget || !e.relatedTarget.closest(".dropdown-tooltip")) {
-      // Add a small delay to allow moving to the tooltip
-      const timeout = setTimeout(() => {
-        setTooltipContent(null);
-      }, 250);
-      setHoverTimeout(timeout);
-    }
-  };
-
-  const handleTooltipItemClick = (href) => {
-    setTooltipContent(null);
-    if (isSidebarCollapsed) {
-      expandSidebar();
-    }
-  };
-
   const isTabActive = (href) => activeTab === href;
-  const isDropdownItemActive = (href) => activeTab === href;
 
   const handleTabClick = (e, href) => {
-    if (isSidebarCollapsed) {
-      expandSidebar();
+    // Auto-close on mobile after clicking a link
+    if (isMobile && !isSidebarCollapsed) {
+      setTimeout(() => toggleSidebar(), 300);
     }
   };
-  // Add click handler for mobile overlay
-useEffect(() => {
-  const overlay = document.querySelector('.overlay');
-  const sidebar = document.querySelector('.sidebar');
-  const hamburger = document.querySelector('.hamburger');
-  
-  const closeSidebar = () => {
-    if (sidebar && !sidebar.classList.contains('collapsed')) {
-      sidebar.classList.add('collapsed');
-      // Update your sidebar context state here
+
+  const handleDropdownClick = (sectionId) => {
+    if (isMobile) {
+      setIsDropdownOpen(prev => ({
+        ...prev,
+        [sectionId]: !prev[sectionId]
+      }));
     }
   };
-  
-  if (overlay) {
-    overlay.addEventListener('click', closeSidebar);
-  }
-  
-  return () => {
-    if (overlay) {
-      overlay.removeEventListener('click', closeSidebar);
-    }
+
+  // Floating menu button click handler
+  const handleMenuButtonClick = () => {
+    toggleSidebar();
   };
-}, []);
+
+  // Don't show floating button on desktop when sidebar is expanded
+  const showFloatingButton = isMobile || (isSidebarCollapsed && !isMobile);
 
   return (
-    <div className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
-      {/*   <div className="theme-toggle">
-        <button onClick={toggleTheme}>
-          {currentTheme === "light" ? "🌙" : "☀️"}
+    <>
+      {/* Floating Menu Button - Show only when needed */}
+      {showFloatingButton && (
+        <button 
+          className="floating-menu-btn"
+          onClick={handleMenuButtonClick}
+          aria-label={isSidebarCollapsed ? "Show menu" : "Hide menu"}
+        >
+          {isSidebarCollapsed ? (
+            <>
+              <span className="menu-icon">☰</span>
+              <span className="menu-text">Menu</span>
+            </>
+          ) : (
+            <>
+              <span className="close-icon">✕</span>
+              <span className="menu-text">Close</span>
+            </>
+          )}
         </button>
-      </div>*/}
-      <div className="sidebar-inner">
-        <h2>Admin</h2>
-        <a
-          href="/admin"
-          className="no-hover"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "10px",
-            cursor: "default",
-          }}
-          onClick={(e) => handleTabClick(e, "/admin")}
-        >
-          <img
-            src="/src/assets/logo-bfp.jpg"
-            alt="Logo"
-            style={{
-              height: "30px",
-              width: "30px",
-              objectFit: "cover",
-              borderRadius: "50%",
-              marginRight: "10px",
-            }}
-          />
-          <span style={{ fontWeight: "800" }}>Villanueva FireStation</span>
-        </a>
-        <a
-          href="/admin"
-          onClick={(e) => handleTabClick(e, "/admin")}
-          className={`${isTabActive("/admin") ? "active" : ""}`}
-        >
-          🖥️ <span>Admin Dashboard</span>
-        </a>
-        {/* Regular tabs */}
-        <a
-          href="/leaveManagement"
-          onClick={(e) => handleTabClick(e, "/leaveManagement")}
-          className={`${isTabActive("/leaveManagement") ? "active" : ""}`}
-        >
-          🗓️ <span>Leave Management</span>
-        </a>
-        <a
-          href="/inventoryControl"
-          onClick={(e) => handleTabClick(e, "/inventoryControl")}
-          className={`${isTabActive("/inventoryControl") ? "active" : ""}`}
-        >
-          📦 <span>Inventory Control</span>
-        </a>
-        <a
-          href="/clearanceSystem"
-          onClick={(e) => handleTabClick(e, "/clearanceSystem")}
-          className={`${isTabActive("/clearanceSystem") ? "active" : ""}`}
-        >
-          🪪 <span>Clearance System</span>
-        </a>
-        <a
-          href="/personnelRegister"
-          onClick={(e) => handleTabClick(e, "/personnelRegister")}
-          className={`${isTabActive("/personnelRegister") ? "active" : ""}`}
-        >
-          🧑‍💼 <span>Personnel Register</span>
-        </a>
-        <a
-          href="/personnelRecentActivity"
-          onClick={(e) => handleTabClick(e, "/personnelRecentActivity")}
-        >
-          🕓 <span>Personnel Recent Activity</span>
-        </a>
-        {/* Dropdown sections - simplified */}
-        {dropdownSections.map((section) => (
-          <div
-            key={section.id}
-            className={`dropdown-section ${section.id}-records`}
-            onMouseEnter={(e) => handleDropdownHover(section, e)}
-            onMouseLeave={handleDropdownLeave}
+      )}
+
+      {/* Sidebar */}
+      <div 
+        ref={sidebarRef}
+        className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""} ${isMobile ? "mobile" : ""}`}
+      >
+        <div className="sidebar-inner">
+          <h2>Admin</h2>
+          <a
+            href="/admin"
+            className="no-hover"
+            onClick={(e) => handleTabClick(e, "/admin")}
           >
-            <div className="dropdown-toggle">
-              {section.icon} <span>{section.title}</span>{" "}
-              <span className="arrow">▼</span>
-            </div>
+            <img
+              src="/src/assets/logo-bfp.jpg"
+              alt="Logo"
+              className="sidebar-logo"
+            />
+            <span className="station-name">Villanueva FireStation</span>
+          </a>
+          
+          <a
+            href="/admin"
+            onClick={(e) => handleTabClick(e, "/admin")}
+            className={`sidebar-link ${isTabActive("/admin") ? "active" : ""}`}
+          >
+            🖥️ <span>Admin Dashboard</span>
+          </a>
+          
+          {/* Regular tabs */}
+          <a
+            href="/leaveManagement"
+            onClick={(e) => handleTabClick(e, "/leaveManagement")}
+            className={`sidebar-link ${isTabActive("/leaveManagement") ? "active" : ""}`}
+          >
+            🗓️ <span>Leave Management</span>
+          </a>
+          
+          <a
+            href="/inventoryControl"
+            onClick={(e) => handleTabClick(e, "/inventoryControl")}
+            className={`sidebar-link ${isTabActive("/inventoryControl") ? "active" : ""}`}
+          >
+            📦 <span>Inventory Control</span>
+          </a>
+          
+          <a
+            href="/clearanceSystem"
+            onClick={(e) => handleTabClick(e, "/clearanceSystem")}
+            className={`sidebar-link ${isTabActive("/clearanceSystem") ? "active" : ""}`}
+          >
+            🪪 <span>Clearance System</span>
+          </a>
+          
+          <a
+            href="/personnelRegister"
+            onClick={(e) => handleTabClick(e, "/personnelRegister")}
+            className={`sidebar-link ${isTabActive("/personnelRegister") ? "active" : ""}`}
+          >
+            🧑‍💼 <span>Personnel Register</span>
+          </a>
+          
+          <a
+            href="/personnelRecentActivity"
+            onClick={(e) => handleTabClick(e, "/personnelRecentActivity")}
+            className={`sidebar-link ${isTabActive("/personnelRecentActivity") ? "active" : ""}`}
+          >
+            🕓 <span>Personnel Recent Activity</span>
+          </a>
 
-            {/* Only show dropdown content when expanded */}
-            {!isSidebarCollapsed && (
-              <div className="dropdown-content">
-                {section.items.map((item, index) => (
-                  <a
-                    key={index}
-                    href={item.href}
-                    className={isDropdownItemActive(item.href) ? "active" : ""}
-                  >
-                    {item.icon} <span>{item.text}</span>
-                  </a>
-                ))}
+          {/* Dropdown sections */}
+          {dropdownSections.map((section) => (
+            <div 
+              key={section.id} 
+              className={`dropdown-section ${section.id}-records ${isDropdownOpen[section.id] ? 'active' : ''}`}
+              onClick={() => isMobile && handleDropdownClick(section.id)}
+            >
+              <div className="dropdown-toggle">
+                {section.icon} <span>{section.title}</span>
+                <span className="arrow">▼</span>
               </div>
-            )}
-          </div>
-        ))}
 
-        <a href="/logout" onClick={(e) => handleTabClick(e, "/logout")}>
-          🚪 <span>Logout</span>
-        </a>
+              {/* Dropdown content */}
+              {(!isSidebarCollapsed || isMobile) && (
+                <div className="dropdown-content">
+                  {section.items.map((item, index) => (
+                    <a
+                      key={index}
+                      href={item.href}
+                      className={`dropdown-item ${isTabActive(item.href) ? "active" : ""}`}
+                      onClick={(e) => handleTabClick(e, item.href)}
+                    >
+                      {item.icon} <span>{item.text}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <a 
+            href="/logout" 
+            className="sidebar-link logout-link"
+            onClick={(e) => handleTabClick(e, "/logout")}
+          >
+            🚪 <span>Logout</span>
+          </a>
+        </div>
       </div>
-      {/*   {isSidebarCollapsed && tooltipContent && (
-        <div
-          className="dropdown-tooltip"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-          }}
-          onMouseEnter={handleTooltipEnter}
-          onMouseLeave={handleTooltipLeave}
-        >
-          <div className="tooltip-header">
-            <span>
-              {tooltipContent.icon} {tooltipContent.title}
-            </span>
-          </div>
-          <div className="tooltip-items">
-            {tooltipContent.items.map((item, index) => (
-              <a
-                key={index}
-                href={item.href}
-                className={isDropdownItemActive(item.href) ? "active" : ""}
-                onClick={() => handleTooltipItemClick(item.href)}
-              >
-                {item.icon} {item.text}
-              </a>
-            ))}
-          </div>
-        </div>
+      
+      {/* Mobile Overlay */}
+      {isMobile && !isSidebarCollapsed && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
       )}
-      Tooltip for collapsed state */}
-
-      {isSidebarCollapsed && tooltipContent && (
-        <div
-          className={`dropdown-tooltip ${tooltipContent.id}-records`}
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-          }}
-          onMouseEnter={handleTooltipEnter}
-          onMouseLeave={handleTooltipLeave}
-        >
-          <div className="tooltip-header">
-            <span>
-              {tooltipContent.icon} {tooltipContent.title}
-            </span>
-          </div>
-          <div className="tooltip-items">
-            {tooltipContent.items.map((item, index) => (
-              <a
-                key={index}
-                href={item.href}
-                className={isDropdownItemActive(item.href) ? "active" : ""}
-                onClick={() => handleTooltipItemClick(item.href)}
-              >
-                {item.icon} {item.text}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
