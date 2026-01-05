@@ -1,4 +1,4 @@
-/* RecruitmentDashboard.module.css - COMPREHENSIVE STYLING - FIXED VERSION */
+/* RecruitmentDashboard.module.css - COMPLETE CSS WITH MOBILE RESPONSIVE */
 
 /* Base Layout & Container */
 .recruitmentContainer {
@@ -823,8 +823,8 @@
 }
 
 .requirementsList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 0.75rem;
 }
 
@@ -1176,49 +1176,477 @@
   animation: spin 1s linear infinite;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .contentGrid {
-    grid-template-columns: 1fr;
-  }
-}
+/* ====== MOBILE RESPONSIVE STYLES ====== */
 
+/* Tablet and Mobile (768px and below) */
+/* Tablet and Mobile (768px and below) */
 @media (max-width: 768px) {
-  .headerInner {
-    flex-direction: column;
+  /* Stats Grid - 2 Columns on Mobile */
+  .statsGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 1rem;
-    text-align: center;
+  }
+  
+  .statCard {
+    padding: 1rem;
+    min-height: 100px;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  
+  .statCard .flex {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+  
+  .statIcon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0 !important;
+  }
+  
+  .statContent {
+    flex: 1 !important;
+  }
+  
+  .statContent p:last-child {
+    font-size: 1rem !important;
+    margin-top: 0.25rem;
+  }
+  
+  .statContent p:first-child {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Ensure each stat card has proper sizing */
+  .statCard.blue,
+  .statCard.green,
+  .statCard.purple,
+  .statCard.yellow {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Requirements List - 2 Columns on Mobile */
+  .requirementsList {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem;
+  }
+  
+  .requirementItem {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    min-height: 70px;
+    box-sizing: border-box;
+  }
+  
+  .requirementInfo {
+    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem;
+  }
+  
+  .requirementStatus {
+    flex-shrink: 0;
+  }
+  
+  .requirementName {
+    font-size: 0.8rem;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    flex: 1;
+    word-break: break-word;
+  }
+  
+  .requirementSize {
+    align-self: flex-end;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    margin-top: auto;
+  }
+
+  /* Specific requirement items for better readability */
+  .requirementsList .requirementItem:nth-child(1) .requirementName {
+    content: "Transcript";
+  }
+  
+  .requirementsList .requirementItem:nth-child(2) .requirementName {
+    content: "Police Clearance";
+  }
+  
+  .requirementsList .requirementItem:nth-child(3) .requirementName {
+    content: "Medical Cert.";
+  }
+  
+  .requirementsList .requirementItem:nth-child(4) .requirementName {
+    content: "NBI Clearance";
+  }
+  
+  .requirementsList .requirementItem:nth-child(5) .requirementName {
+    content: "Resume/CV";
+  }
+  
+  .requirementsList .requirementItem:nth-child(6) .requirementName {
+    content: "Birth Cert.";
+  }
+  
+  .requirementsList .requirementItem:nth-child(7) .requirementName {
+    content: "Tax Cert.";
+  }
+
+  /* Header adjustments */
+  .headerInner {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    width: 100% !important;
   }
   
   .headerLeft {
-    flex-direction: column;
-    text-align: center;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 1rem !important;
   }
   
   .headerRight {
-    flex-direction: column;
-    gap: 1rem;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
   }
   
-  .statsGrid {
-    grid-template-columns: 1fr;
+  /* Content grid adjustments */
+  .contentGrid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
   }
   
-  .formRow {
-    grid-template-columns: 1fr;
+  /* Make cards more compact on mobile */
+  .overviewCard,
+  .timelineCard,
+  .contactCard,
+  .actionsCard,
+  .scheduleCard,
+  .documentsCard,
+  .requirementsCard {
+    padding: 1.25rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
+  /* Reduce font sizes for mobile */
   .bannerContent h2 {
-    font-size: 2rem;
+    font-size: 1.75rem !important;
+  }
+  
+  .overviewHeader h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .sectionHeader h3,
+  .documentsCard h3,
+  .requirementsCard h3,
+  .scheduleCard h3,
+  .contactCard h3,
+  .timelineCard h3 {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Adjust timeline for mobile */
+  .timelineItem {
+    display: flex !important;
+    gap: 0.75rem !important;
+  }
+  
+  .timelineDot {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  .timelineItem::before {
+    left: 9px !important;
+  }
+  
+  /* Contact items on mobile */
+  .contactItem {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+  }
+  
+  .contactIcon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Upload section mobile adjustments */
+  .uploadSection {
+    padding: 1rem !important;
+  }
+  
+  /* Document items on mobile */
+  .documentItem {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+  
+  .documentActions {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  
+  /* Quick actions mobile */
+  .actionText {
+    font-size: 0.8rem !important;
+  }
+  
+  .actionButton {
+    padding: 0.875rem 0.75rem !important;
+    min-height: 44px !important;
+  }
+  
+  /* Modal adjustments for mobile */
+  .modalContent {
+    margin: 1rem !important;
+    max-height: 85vh !important;
+    width: calc(100% - 2rem) !important;
   }
   
   .modalContent.large {
-    max-width: 100%;
-    margin: 1rem;
+    margin: 0.5rem !important;
+    width: calc(100% - 1rem) !important;
+  }
+  
+  /* Profile form mobile */
+  .profileForm .formRow {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Touch-friendly button sizes for mobile */
+  .logoutButton,
+  .uploadButton,
+  .sendButton,
+  .saveButton,
+  .cancelButton,
+  .retryButton {
+    min-height: 44px !important;
+    padding: 0.75rem 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .viewButton,
+  .deleteButton {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .documentSelect,
+  .subjectSelect,
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea {
+    font-size: 16px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
   }
 }
 
+/* Mobile - Extra small screens (480px and below) */
 @media (max-width: 480px) {
+  /* Stats Grid - Keep 2 columns but adjust spacing */
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem;
+  }
+  
+  .statCard {
+    padding: 0.875rem !important;
+    min-height: 90px;
+  }
+  
+  .statCard .flex {
+    gap: 0.5rem !important;
+  }
+  
+  .statIcon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .statContent p:last-child {
+    font-size: 0.9rem !important;
+  }
+  
+  .statContent p:first-child {
+    font-size: 0.7rem !important;
+  }
+
+  /* Requirements List - Keep 2 columns */
+  .requirementsList {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem;
+  }
+  
+  .requirementItem {
+    padding: 0.5rem !important;
+    min-height: 60px;
+  }
+  
+  .requirementName {
+    font-size: 0.75rem !important;
+  }
+  
+  .requirementSize {
+    font-size: 0.65rem !important;
+  }
+
+  /* Main content padding */
+  .mainContent,
+  .headerContent,
+  .bannerContent {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .overviewCard,
+  .timelineCard,
+  .contactCard,
+  .actionsCard,
+  .scheduleCard,
+  .documentsCard,
+  .requirementsCard {
+    padding: 1rem !important;
+  }
+  
+  /* Form actions column layout */
+  .formActions {
+    flex-direction: column !important;
+  }
+
+  /* Banner adjustments */
+  .bannerContent h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .bannerContent p {
+    font-size: 1rem !important;
+  }
+
+  /* Header title adjustments */
+  .headerTitles h1 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Schedule details compact */
+  .scheduleItem {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Document meta info smaller */
+  .documentMeta {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Very small screens (360px and below) - Switch to single column */
+@media (max-width: 360px) {
+  /* Switch to single column for very small screens */
+  .statsGrid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .requirementsList {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Even smaller text for tiny screens */
+  .requirementName {
+    font-size: 0.7rem !important;
+  }
+  
+  .documentName {
+    font-size: 0.75rem !important;
+  }
+  
+  .actionText {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Compact header */
+  .headerLeft {
+    gap: 0.5rem !important;
+  }
+  
+  .headerIcon {
+    padding: 0.5rem !important;
+  }
+  
+  .headerTitles h1 {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Mobile - Extra small screens (480px and below) */
+@media (max-width: 480px) {
+  /* Stats Grid - Single column on extra small */
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .statCard {
+    padding: 0.875rem;
+  }
+  
+  .statContent p:last-child {
+    font-size: 1rem;
+  }
+
+  /* Requirements List - Single column on extra small */
+  .requirementsList {
+    grid-template-columns: 1fr;
+  }
+  
+  .requirementItem {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .requirementInfo {
+    width: auto;
+  }
+
+  /* Main content padding */
   .mainContent,
   .headerContent,
   .bannerContent {
@@ -1236,7 +1664,78 @@
     padding: 1rem;
   }
   
+  /* Form actions column layout */
   .formActions {
     flex-direction: column;
   }
+
+  /* Banner adjustments */
+  .bannerContent h2 {
+    font-size: 1.5rem;
+  }
+  
+  .bannerContent p {
+    font-size: 1rem;
+  }
+
+  /* Header title adjustments */
+  .headerTitles h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Document abbreviations for very small screens */
+  .requirementName {
+    font-size: 0.75rem;
+  }
+
+  /* Schedule details compact */
+  .scheduleItem {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Document meta info smaller */
+  .documentMeta {
+    font-size: 0.7rem;
+  }
 }
+
+/* Very small screens (360px and below) */
+@media (max-width: 360px) {
+  /* Force single column for everything on very small screens */
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .requirementsList {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Even smaller text for tiny screens */
+  .requirementName {
+    font-size: 0.7rem;
+  }
+  
+  .documentName {
+    font-size: 0.75rem;
+  }
+  
+  .actionText {
+    font-size: 0.75rem;
+  }
+  
+  /* Compact header */
+  .headerLeft {
+    gap: 0.5rem;
+  }
+  
+  .headerIcon {
+    padding: 0.5rem;
+  }
+  
+  .headerTitles h1 {
+    font-size: 1.25rem;
+  }
+}
+
+/* ====== END MOBILE RESPONSIVE STYLES ====== */
